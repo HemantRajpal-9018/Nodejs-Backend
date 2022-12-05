@@ -1,6 +1,6 @@
-{"Laptop": [{
+ [{
     "id":1,
-    "Brand": "Lenovo Legion",
+    "Brand": "Brand:Lenovo Legion",
     "Operating_System":"Windows 11",
     "Processor":"5.2 ghz",
     "Memory":"32 GB",
@@ -54,4 +54,4 @@
 "Release_Year" :"2022",
 "Model_Number" :"Legion 9i Gen7",
 "published" : true
-}]}
+}]
