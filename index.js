@@ -1,63 +1,58 @@
-const http = require('http');
-const path = require('path');
+const http= require('http');
 const fs= require('fs');
+const path = require('path');
+const {MongoClient} = require('mongodb');
+const uri ="mongodb+srv://hemantrajpal:hemantrajpal@laptopgiantcluster.1xak4ce.mongodb.net/?retryWrites=true&w=majority";
+const client = new MongoClient(uri);
 
-const server = http.createServer((req, res)=>
-{
-    if (req.url==='/api')
-    {
-        fs.readFile
-        (
-            path.join(__dirname, 'public', 'db.json'),'utf-8',(err, content) => 
-            {
-                                    
-                                    if (err) throw err;
-                                    // Please note the content-type here is application/json
-                                    res.setHeader("Access-Control-Allow-Origin", "*") ;
-                                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                                    res.end(content);
-            }
-              );
+const DBconnect=async()=>{
+    try{
+        await client.connect();
+        console.log("db connected")
+    
     }
-    else
-    {
-        let filePath= path.join(__dirname, 'public', req.url==='/' ? 'index.html':req.url );
-        let extname = path.extname(filePath)
-        switch(extname)
-        {
-            case '.css':
-                contentType= 'text/css';
-                break;
-            
-            case '.html':
-                    contentType= 'text/html';
-                    break
-            case '.json':
-                    contentType= 'application/json';
-                    break
+    catch(e){
+        console.log(e)
+    }
+}
+    DBconnect();
+    const server   =http.createServer(async(req,res) => {
+    const headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
+
+    
+    };
+    console.log(req.url)
+    if(req.url === '/'){
+        fs.readFile( path.join(__dirname,'public','index.html'),(err,data)=>{
+
+        if (err) throw err;
+        res.writeHead(200,{ 'Content-Type' : 'text/html'});
+        res.end(data);
         }
-        fs.readFile(filePath, (err, content)=>
-        {
-            if(err) 
-            {
-               
-                    fs.readFile(path.join(__dirname,'public','404.html'),(err,content)=>
-                    {
-                        res.setHeader("Access-Control-Allow-Origin", '*');
-                        res.writeHead(200, {"Content-Type": 'text/html'});
-                        res.end(content, 'utf-8')
-                    });
-                            
-            }
-            else
-            {
-                res.setHeader("Access-Control-Allow-Origin", "*");
-                res.writeHead(200, {'Content-Type':contentType});
-                res.end(content, 'utf-8');
-            }
-        });
+    )
+    
+}
+    else if(req.url=='/api')
+    {
+
+        const cursor = client.db("laptopgiant").collection("LaptopDB").find({});
+        const results = await cursor.toArray();
+        //console.log(results);
+        const js= (JSON.stringify(results));    
+        res.writeHead(200,headers)
+        console.log(js);
+        res.end(js);
+        
+
     }
-});
+    else{
+
+        res.end("Eror 404")
+    }
+
+    });
 
 const PORT = process.env.PORT || 5959;
-server.listen(PORT,()=>console.log(`Great our server is working ${PORT}`))
+server.listen(PORT,() => console.log(`yay the server is running finally ${PORT}`));
